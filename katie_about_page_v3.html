@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>katie / lunark.wav</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rose-deep: #8a6068;
+    --cream: #1e1a1b;
+    --text: #c8b8ba;
+    --text-mid: #9a8a8d;
+    --text-soft: #6e6062;
+    --divider: rgba(138, 96, 104, 0.18);
+    --card-bg: #1a1618;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .bg-petals {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .petal {
+    position: absolute;
+    border-radius: 60% 40% 60% 40% / 40% 60% 40% 60%;
+    opacity: 0.06;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 4rem 2rem 6rem;
+  }
+
+  .header { text-align: center; margin-bottom: 4rem; }
+
+  .floral-crown {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    opacity: 0.35;
+  }
+  .floral-crown svg { width: 20px; height: 20px; }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    font-weight: 400;
+    color: #b8a6a9;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin-bottom: 0.4rem;
+  }
+
+  .handle {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    letter-spacing: 0.08em;
+    font-weight: 300;
+    margin-bottom: 1.2rem;
+  }
+
+  .tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text-mid);
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 3rem 0;
+    opacity: 0.25;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--rose-deep);
+  }
+  .divider-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--rose-deep); }
+
+  .section { margin-bottom: 3.5rem; animation: fadeUp 0.6s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section:nth-child(1) { animation-delay: 0.1s; }
+  .section:nth-child(2) { animation-delay: 0.2s; }
+  .section:nth-child(3) { animation-delay: 0.3s; }
+  .section:nth-child(4) { animation-delay: 0.4s; }
+  .section:nth-child(5) { animation-delay: 0.5s; }
+  .section:nth-child(6) { animation-delay: 0.6s; }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rose-deep);
+    font-weight: 500;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.8;
+  }
+  .section-label::after {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 0.5px;
+    background: var(--rose-deep);
+    opacity: 0.4;
+  }
+
+  p {
+    font-size: 0.97rem;
+    line-height: 1.85;
+    color: var(--text-mid);
+    font-weight: 300;
+  }
+
+  p + p { margin-top: 0.9rem; }
+
+  blockquote {
+    border-left: 1.5px solid #3a2a2e;
+    margin: 1rem 0 0;
+    padding: 0.5rem 0 0.5rem 1.1rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--text-soft);
+    line-height: 1.75;
+  }
+
+  .warning-card {
+    background: #1c1719;
+    border: 0.5px solid #3a2a2e;
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    margin-top: 1rem;
+  }
+
+  .warning-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 0.55rem 0;
+    border-bottom: 0.5px solid rgba(90, 62, 67, 0.2);
+  }
+  .warning-item:last-child { border-bottom: none; }
+
+  .warning-icon { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .warning-text { font-size: 0.88rem; line-height: 1.7; color: var(--text-mid); }
+  .warning-text strong { color: #a89092; font-weight: 500; }
+
+  .reviews-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
+
+  .review-card {
+    background: var(--card-bg);
+    border: 0.5px solid #3a2a2e;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
+
+  .review-author { font-size: 0.75rem; font-weight: 500; color: var(--rose-deep); letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+  .review-stars { font-size: 11px; color: #8a7450; margin-bottom: 0.4rem; letter-spacing: 2px; }
+  .review-text { font-size: 0.88rem; color: var(--text-mid); font-style: italic; line-height: 1.65; }
+
+  .note-card {
+    background: #1c1a18;
+    border: 0.5px solid #3a3028;
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    margin-top: 1rem;
+  }
+  .note-card p { color: #7a6e62; }
+
+  .footer-flower { text-align: center; margin-top: 4rem; opacity: 0.15; }
+</style>
+</head>
+<body>
+
+<div class="bg-petals" aria-hidden="true">
+  <div class="petal" style="width:340px;height:260px;background:#8a6068;top:-80px;left:-100px;transform:rotate(-20deg)"></div>
+  <div class="petal" style="width:200px;height:160px;background:#7a5860;top:200px;right:-60px;transform:rotate(35deg)"></div>
+  <div class="petal" style="width:260px;height:200px;background:#6e8069;bottom:300px;left:-80px;transform:rotate(10deg)"></div>
+  <div class="petal" style="width:180px;height:140px;background:#7a6858;bottom:100px;right:-40px;transform:rotate(-15deg)"></div>
+</div>
+
+<div class="page">
+
+  <header class="header">
+    <div class="floral-crown" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C10 3 8 5 8 7C8 9 10 10 12 10C14 10 16 9 16 7C16 5 14 3 12 3Z" fill="#8a6068"/><path d="M12 10C12 10 9 12 9 15C9 17 10.5 18 12 18C13.5 18 15 17 15 15C15 12 12 10 12 10Z" fill="#6a4850" opacity="0.6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="12" rx="5" ry="7" fill="#7a5860"/><ellipse cx="12" cy="12" rx="2" ry="2" fill="#8a6068" opacity="0.5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C10 3 8 5 8 7C8 9 10 10 12 10C14 10 16 9 16 7C16 5 14 3 12 3Z" fill="#8a6068"/><path d="M12 10C12 10 9 12 9 15C9 17 10.5 18 12 18C13.5 18 15 17 15 15C15 12 12 10 12 10Z" fill="#6a4850" opacity="0.6"/></svg>
+    </div>
+
+    <h1>lunark</h1>
+    <p class="handle">katelyn &nbsp;·&nbsp; she/her</p>
+    <p class="tagline">a pane of glass with cracks all along her — some deep, some huge, some tiny. she doesn't regret them.</p>
+  </header>
+
+  <div class="divider"><div class="divider-dot"></div></div>
+
+  <div class="section">
+    <div class="section-label">a little about me</div>
+    <p>hiya, i'm lunark. my friends know me as Katelyn. i do music and stuff !!</p>
+    <p>i'm a transfem girl. i've been making things for as long as i can remember — games, code, music. right now it's mostly music.</p>
+    <p>the way i make music is by focusing on the way things make me feel. without an image or feeling, i can't make music.</p>
+  </div>
+
+  <div class="divider"><div class="divider-dot"></div></div>
+
+  <div class="section">
+    <div class="section-label">my creative work</div>
+    <p>i make hardcore / breakcore music using FL Studio. every track is my own direct interpretation of an image, feeling, or experience in music form.</p>
+    <p>i have a long and rather tedious past with coding in C# and game development in the Unity Engine. i've since moved to music, as game design has brought me a lot of mental friction.</p>
+    <blockquote>"Each day that goes by brings me closer to the end... I'm just an old man clinging to his brushes."</blockquote>
+  </div>
+
+  <div class="divider"><div class="divider-dot"></div></div>
+
+  <div class="section">
+    <div class="section-label">how i communicate</div>
+    <p>every word i say is a small calculation. i'm constantly making sure i'm not saying something i don't mean, or doing something i don't mean. it's not a bad thing — it just means i'm tired a lot.</p>
+    <p>i also tend to build a little mental model of people i care about. i take note of how they respond to things and sort of simulate them in my head. it helps me understand people. it is also exhausting.</p>
+    <p>i say "i love you" a lot. before i leave, before a gap opens up. it's just how i'm wired.</p>
+  </div>
+
+  <div class="divider"><div class="divider-dot"></div></div>
+
+  <div class="section">
+    <div class="section-label">things you should probably know</div>
+    <div class="warning-card">
+      <div class="warning-item">
+        <svg class="warning-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#6a4850" stroke-width="1"/>
+          <path d="M10 6v5M10 13v1" stroke="#6a4850" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <p class="warning-text"><strong>i need reassurance.</strong> silence reads as uncertainty to my nervous system, even when my brain knows better. i won't assume the worst — but something in me will quietly brace.</p>
+      </div>
+      <div class="warning-item">
+        <svg class="warning-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#6a4850" stroke-width="1"/>
+          <path d="M10 6v5M10 13v1" stroke="#6a4850" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <p class="warning-text"><strong>small things can knock me down.</strong> being ignored in a gc when i'm genuinely asking something gets to me more than it probably should. just so you know.</p>
+      </div>
+      <div class="warning-item">
+        <svg class="warning-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#6a4850" stroke-width="1"/>
+          <path d="M10 6v5M10 13v1" stroke="#6a4850" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <p class="warning-text"><strong>i rely on love and affection a lot.</strong> praise, warmth, being seen. i'm not ashamed of it. it's just true.</p>
+      </div>
+      <div class="warning-item">
+        <svg class="warning-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#6a4850" stroke-width="1"/>
+          <path d="M10 6v5M10 13v1" stroke="#6a4850" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <p class="warning-text"><strong>i feel alone a lot.</strong> even in spaces i belong in. you don't need to fix it. just something that's true about me.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-dot"></div></div>
+
+  <div class="section">
+    <div class="section-label">what i'm like as a friend</div>
+    <p>i show up. i remember things. i'll send you something at 2am because it reminded me of you and i couldn't not.</p>
+    <p>i'm a specific shape. fewer people fit, but the ones who do really do.</p>
+    <div class="note-card">
+      <p>if you're reading this thinking about getting close to me — i don't need you to be perfect. i just need you to actually be there. those are really different things.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-dot"></div></div>
+
+  <div class="section">
+    <div class="section-label">peer-reviewed — testimonials</div>
+    <p style="font-size:0.82rem;color:var(--text-soft);margin-bottom:0.8rem;">friends were asked to leave reviews. results were mixed.</p>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-author">skiplaw</div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"uhh foid foid go away"</p>
+      </div>
+      <div class="review-card">
+        <div class="review-author">[ your friend here ]</div>
+        <div class="review-stars">★ ★ ★ ★ ★</div>
+        <p class="review-text">"[ their review — ask them!! ]"</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-flower" aria-hidden="true">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <ellipse cx="24" cy="12" rx="5" ry="9" fill="#8a6068"/>
+      <ellipse cx="24" cy="36" rx="5" ry="9" fill="#8a6068"/>
+      <ellipse cx="12" cy="24" rx="9" ry="5" fill="#8a6068"/>
+      <ellipse cx="36" cy="24" rx="9" ry="5" fill="#8a6068"/>
+      <ellipse cx="15.5" cy="15.5" rx="4.5" ry="8" fill="#6a4850" transform="rotate(-45 15.5 15.5)"/>
+      <ellipse cx="32.5" cy="15.5" rx="4.5" ry="8" fill="#6a4850" transform="rotate(45 32.5 15.5)"/>
+      <ellipse cx="15.5" cy="32.5" rx="4.5" ry="8" fill="#6a4850" transform="rotate(45 15.5 32.5)"/>
+      <ellipse cx="32.5" cy="32.5" rx="4.5" ry="8" fill="#6a4850" transform="rotate(-45 32.5 32.5)"/>
+      <circle cx="24" cy="24" r="6" fill="#6a4850" opacity="0.6"/>
+    </svg>
+  </div>
+
+</div>
+</body>
+</html>
