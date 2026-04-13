@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lunark · deeper</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0a0810;
+  --bg2:     #100d1a;
+  --bg3:     #161220;
+  --surface: #1a1628;
+  --purple:  #9060c0;
+  --purple2: #b080e0;
+  --purple3: #d0b0f0;
+  --rose:    #c06080;
+  --rose2:   #e08098;
+  --rose3:   #f0b0c0;
+  --blue:    #6080b0;
+  --blue2:   #80a0d0;
+  --text:    #d0c8e0;
+  --text2:   #9888b0;
+  --text3:   #605870;
+  --text4:   #382840;
+  --snow:    rgba(220,210,240,0.4);
+  --border:  rgba(140,100,180,0.15);
+  --border2: rgba(180,120,160,0.2);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── ambient gradients ── */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(100,60,160,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 350px at 85% 80%, rgba(160,60,100,0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 250px at 50% 50%, rgba(60,80,140,0.07) 0%, transparent 70%);
+}
+
+/* ── snow canvas ── */
+#snowCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── disclaimer overlay ── */
+#disclaimer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--bg);
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#disclaimer.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.disclaimer-box {
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  animation: discIn 0.8s cubic-bezier(.2,.8,.3,1) both;
+}
+
+@keyframes discIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.disc-sigil {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  opacity: 0.6;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.05); opacity: 0.8; }
+}
+
+.disc-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 2.2rem;
+  color: var(--purple3);
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.disc-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--rose2);
+  opacity: 0.7;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.disc-body {
+  font-size: 1.1rem;
+  line-height: 1.95;
+  color: var(--text2);
+  font-weight: 300;
+  margin-bottom: 2.5rem;
+}
+
+.disc-body em { color: var(--rose3); font-style: italic; }
+.disc-body strong { color: var(--text); font-weight: 500; }
+
+.disc-rule {
+  height: 0.5px;
+  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+  margin: 1.8rem 0;
+}
+
+.disc-who {
+  font-size: 0.92rem;
+  color: var(--text3);
+  line-height: 1.8;
+  font-style: italic;
+  margin-bottom: 2.5rem;
+}
+
+/* countdown button */
+.disc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 0.75rem 2rem;
+  cursor: not-allowed;
+  transition: all 0.3s;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.disc-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: var(--progress, 0%);
+  background: rgba(140,100,180,0.12);
+  transition: width 0.1s linear;
+}
+
+.disc-btn.ready {
+  color: var(--purple3);
+  border-color: rgba(160,100,220,0.4);
+  cursor: pointer;
+  animation: btnGlow 2s ease-in-out infinite;
+}
+
+@keyframes btnGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(140,100,200,0); }
+  50%       { box-shadow: 0 0 20px rgba(140,100,200,0.2); }
+}
+
+.disc-btn.ready:hover {
+  background: rgba(140,100,180,0.12);
+  border-color: rgba(180,120,240,0.5);
+  color: var(--purple2);
+  transform: translateY(-1px);
+}
+
+.btn-count {
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
+.disc-back {
+  display: block;
+  margin-top: 1.2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  text-decoration: none;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+.disc-back:hover { opacity: 0.7; }
+
+/* ── main content ── */
+#content {
+  position: relative;
+  z-index: 2;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 2rem 8rem;
+  visibility: hidden;
+}
+
+#content.visible { visibility: visible; }
+
+/* page header */
+.pg-header {
+  padding: 5rem 0 3rem;
+  text-align: center;
+}
+
+.pg-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--rose2);
+  opacity: 0.6;
+  margin-bottom: 1.2rem;
+  display: block;
+}
+
+.pg-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--purple3);
+  margin-bottom: 0.6rem;
+  filter: drop-shadow(0 0 30px rgba(140,80,200,0.2));
+}
+
+.pg-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+  margin-bottom: 2rem;
+}
+
+.pg-intro {
+  font-size: 1.1rem;
+  line-height: 1.95;
+  color: var(--text2);
+  font-weight: 300;
+  font-style: italic;
+  max-width: 520px;
+  margin: 0 auto;
+  opacity: 0.8;
+}
+
+.header-rule {
+  height: 0.5px;
+  background: linear-gradient(90deg, transparent, rgba(140,80,200,0.3), rgba(180,80,120,0.2), transparent);
+  margin: 3rem 0;
+}
+
+/* ── paper cards ── */
+.papers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.paper {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(60px) rotate(var(--tilt, 0deg));
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.2,.8,.3,1), box-shadow 0.3s;
+}
+
+.paper.revealed {
+  opacity: 1;
+  transform: translateY(0) rotate(0deg);
+}
+
+.paper:hover {
+  box-shadow: 0 8px 40px rgba(100,60,160,0.15);
+  border-color: var(--border2);
+}
+
+/* tape strip at top */
+.paper::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%) rotate(var(--tape-rot, -1deg));
+  width: 70px; height: 18px;
+  background: rgba(200,180,240,0.06);
+  border: 0.5px solid rgba(200,180,240,0.12);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+/* left accent bar */
+.paper::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent, var(--purple));
+  opacity: 0.6;
+}
+
+.paper-inner { padding: 2rem 2rem 2rem 2.5rem; }
+
+.paper-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+  margin-bottom: 0.6rem;
+  opacity: 0.6;
+}
+
+.paper-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 1.2rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.paper-title em {
+  font-style: italic;
+  color: var(--purple3);
+}
+
+.paper-section {
+  margin-bottom: 1.4rem;
+}
+
+.paper-section:last-child { margin-bottom: 0; }
+
+.paper-section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-text, var(--purple2));
+  opacity: 0.7;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paper-section-label::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+.paper-text {
+  font-size: 1.05rem;
+  line-height: 1.95;
+  color: var(--text2);
+  font-weight: 300;
+}
+
+.paper-text em { color: var(--rose3); font-style: italic; }
+.paper-text strong { color: var(--text); font-weight: 500; }
+
+/* how-to box */
+.how-box {
+  background: rgba(0,0,0,0.2);
+  border: 0.5px solid rgba(140,100,180,0.12);
+  border-radius: 6px;
+  padding: 1.1rem 1.3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 520px) { .how-box { grid-template-columns: 1fr; } }
+
+.how-col-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.how-col-label.do   { color: #80c0a0; }
+.how-col-label.dont { color: var(--rose2); }
+
+.how-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.how-list li {
+  font-size: 0.95rem;
+  color: var(--text2);
+  line-height: 1.6;
+  font-weight: 300;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.how-list li::before {
+  position: absolute;
+  left: 0;
+  font-size: 0.7rem;
+}
+
+.how-list.do   li::before { content: '✓'; color: #80c0a0; }
+.how-list.dont li::before { content: '✕'; color: var(--rose2); opacity: 0.7; }
+
+/* divider between papers */
+.paper-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0.3;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+}
+.paper-divider::before, .paper-divider::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+/* footer */
+.pg-footer {
+  margin-top: 5rem;
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 0.5px solid var(--border);
+}
+
+.pg-footer-text {
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--text3);
+  line-height: 2;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+}
+
+.back-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-decoration: none;
+  border: 0.5px solid var(--border);
+  border-radius: 100px;
+  padding: 0.5rem 1.2rem;
+  display: inline-block;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+.back-link:hover { opacity: 1; border-color: var(--border2); color: var(--purple3); }
+
+@media (max-width: 600px) {
+  #content { padding: 0 1.3rem 6rem; }
+  .pg-header { padding: 3.5rem 0 2.5rem; }
+  .paper-inner { padding: 1.6rem 1.4rem 1.6rem 2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true"></div>
+<canvas id="snowCanvas" aria-hidden="true"></canvas>
+
+<!-- ── DISCLAIMER ── -->
+<div id="disclaimer" role="dialog" aria-modal="true" aria-labelledby="discTitle">
+  <div class="disclaimer-box">
+    <span class="disc-sigil">🌑</span>
+    <div class="disc-label">content warning · emotional depth</div>
+    <h1 class="disc-title" id="discTitle">you're about to go deeper.</h1>
+
+    <div class="disc-rule"></div>
+
+    <p class="disc-body">
+      this page contains <em>raw, unfiltered</em> descriptions of how i work psychologically. it's not meant to be scary — it's meant to be <strong>honest</strong>.<br><br>
+      i wrote this because i'd rather someone know before they get close to me, than be blindsided later.
+    </p>
+
+    <div class="disc-rule"></div>
+
+    <p class="disc-who">
+      you should read this if you're actively getting closer to me,<br>
+      or if you want to understand me before you do.<br><br>
+      you don't have to. but i hope you will.
+    </p>
+
+    <button class="disc-btn" id="discBtn" disabled>
+      <span id="btnText">wait</span>
+      <span class="btn-count" id="btnCount">3</span>
+    </button>
+    <a href="lunark-floral2.html" class="disc-back">← go back</a>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div id="content" aria-live="polite">
+
+  <div class="pg-header">
+    <span class="pg-eyebrow">lunark · psychological layers</span>
+    <div class="pg-title">the deeper layers</div>
+    <div class="pg-sub">katelyn &nbsp;·&nbsp; she / her</div>
+    <p class="pg-intro">the surface is always fine. the surface smiles and makes music and sends flowers. but here — here is what lives underneath. read this like you're being trusted with something real, because you are.</p>
+  </div>
+
+  <div class="header-rule"></div>
+
+  <div class="papers" id="papers">
+
+    <!-- 01 -->
+    <div class="paper" style="--accent:#9060c0;--accent-text:#b080e0;--tilt:-0.4deg;--tape-rot:-2deg;" data-delay="0">
+      <div class="paper-inner">
+        <div class="paper-num">01 / 06</div>
+        <div class="paper-title">fear of <em>failing</em> the people i love</div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#b080e0;">what it is</div>
+          <p class="paper-text">
+            this isn't standard fear of abandonment, exactly. it's more specific: i have an overwhelming need to not be the reason someone is inconvenienced, upset, or disappointed. when i sense that i've caused even minor frustration — a wrong tone, a small ask at a bad time — i don't get angry or defensive. i disappear.
+            <br><br>
+            there was a night i asked my mom for help cooking pasta. she got up from bed. she wasn't yelling — she didn't say anything unkind — but there was a tone. every word felt like it ended with an invisible <em>"ugh."</em> i walked to a dark corner of our dining room and sat on the floor, alone, in the dark. didn't make a sound. felt too scared to come out even to check on the food. i just waited.
+            <br><br>
+            she never apologized. she didn't realize. by the end she was soft and gentle. but i had already folded into myself, and stayed there.
+          </p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#b080e0;">why i think it happens</div>
+          <p class="paper-text">i think i learned very early that being a burden is a moral failure. that taking up space — needing things — makes me a problem. so when i sense friction, my instinct is to make myself as small and invisible as possible until the danger passes.</p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#b080e0;">what helps</div>
+          <div class="how-box">
+            <div>
+              <span class="how-col-label do">do</span>
+              <ul class="how-list do">
+                <li>soften your tone when you notice i've gone quiet</li>
+                <li>say "i'm not upset with you" without being asked</li>
+                <li>give me a few minutes, then gently check in</li>
+                <li>let me know when you're frustrated at a situation, not me</li>
+              </ul>
+            </div>
+            <div>
+              <span class="how-col-label dont">don't</span>
+              <ul class="how-list dont">
+                <li>sigh heavily or use clipped responses when i've asked for something</li>
+                <li>go silent immediately after i've said something — i'll assume the worst</li>
+                <li>expect me to "just know" you're fine when your tone says otherwise</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper-divider">· · ·</div>
+
+    <!-- 02 -->
+    <div class="paper" style="--accent:#c06080;--accent-text:#e08098;--tilt:0.3deg;--tape-rot:1.5deg;" data-delay="1">
+      <div class="paper-inner">
+        <div class="paper-num">02 / 06</div>
+        <div class="paper-title">conflict makes me <em>disappear</em></div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#e08098;">what it is</div>
+          <p class="paper-text">
+            when there's conflict — or when someone goes quiet on me unexpectedly — i don't pick one reaction. i do all of them at once. i shut down. i get anxious. i mask it completely and pretend i'm fine. then i obsessively replay the conversation looking for what i did wrong.
+            <br><br>
+            i will not tell you i'm hurting. i will smile. i will say "i'm okay." i will carry it alone until it becomes too heavy, and by then you might not even know anything happened. i go non-verbal sometimes — not as a choice, just as a fact. words stop coming.
+          </p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#e08098;">why i think it happens</div>
+          <p class="paper-text">expressing hurt feels like accusing someone. and accusing someone feels like risking everything. so i swallow it. it feels safer to suffer quietly than to say "you hurt me" and watch something change.</p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#e08098;">what helps</div>
+          <div class="how-box">
+            <div>
+              <span class="how-col-label do">do</span>
+              <ul class="how-list do">
+                <li>reach out first if something feels off between us</li>
+                <li>make it easy to say "that actually hurt" without consequences</li>
+                <li>be patient when i go quiet — don't push, just stay</li>
+                <li>tell me directly if you're okay, even if it seems obvious</li>
+              </ul>
+            </div>
+            <div>
+              <span class="how-col-label dont">don't</span>
+              <ul class="how-list dont">
+                <li>wait for me to bring up conflict first — i likely never will</li>
+                <li>interpret my silence as indifference. it's usually the opposite.</li>
+                <li>dismiss small hurts as "not a big deal" — to me, they compound</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper-divider">· · ·</div>
+
+    <!-- 03 -->
+    <div class="paper" style="--accent:#6080b0;--accent-text:#80a0d0;--tilt:-0.2deg;--tape-rot:2deg;" data-delay="2">
+      <div class="paper-inner">
+        <div class="paper-num">03 / 06</div>
+        <div class="paper-title">i perform <em>versions</em> of myself</div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#80a0d0;">what it is</div>
+          <p class="paper-text">
+            i shift a lot depending on who i'm with. not lying — more like tuning. around some people i'm loud and playful. around others i'm quieter, more careful, watching what i say. this happens a lot, and i don't always realize i'm doing it.
+            <br><br>
+            the version of me you first meet might feel different from the me that shows up three months in. as i get more comfortable, the mask thins. what's underneath is softer, messier, and more real — but also more easily hurt.
+          </p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#80a0d0;">why i think it happens</div>
+          <p class="paper-text">i've learned that showing the full version of me too fast tends to overwhelm people or push them away. so i reveal slowly, in layers, testing safety. the irony is that the people i feel safest with are the ones most likely to see the parts of me i can't fully control.</p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#80a0d0;">what helps</div>
+          <div class="how-box">
+            <div>
+              <span class="how-col-label do">do</span>
+              <ul class="how-list do">
+                <li>let me be different around you than i am elsewhere</li>
+                <li>notice when i get more real and meet that with gentleness</li>
+                <li>reassure me occasionally that you like who i actually am</li>
+              </ul>
+            </div>
+            <div>
+              <span class="how-col-label dont">don't</span>
+              <ul class="how-list dont">
+                <li>compare "fun Katie" to "quiet Katie" like one is wrong</li>
+                <li>push me to "just be myself" — i'm trying. it takes time.</li>
+                <li>act surprised when i reveal something heavy. i've been holding it a while.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper-divider">· · ·</div>
+
+    <!-- 04 -->
+    <div class="paper" style="--accent:#a06090;--accent-text:#c880b0;--tilt:0.5deg;--tape-rot:-1.5deg;" data-delay="3">
+      <div class="paper-inner">
+        <div class="paper-num">04 / 06</div>
+        <div class="paper-title">i am convinced i am <em>too much</em></div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#c880b0;">what it is</div>
+          <p class="paper-text">
+            i hold back. constantly. there are things i want to say, feelings i want to express, help i want to ask for — and i don't. because some part of me genuinely believes that if i show too much need, you'll leave.
+            <br><br>
+            i feel like a burden as a default. not as a passing thought — as a baseline assumption about who i am in relation to other people. i assume my needs are inconvenient. i assume my emotions are exhausting. i assume that if i asked for what i actually needed, you'd quietly start pulling away.
+          </p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#c880b0;">why i think it happens</div>
+          <p class="paper-text">i think this is built from a long history of reading the room and deciding i was reading as "too much." whether that was accurate or not, the pattern stuck. needing things = being a problem. so i edit myself before i speak.</p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#c880b0;">what helps</div>
+          <div class="how-box">
+            <div>
+              <span class="how-col-label do">do</span>
+              <ul class="how-list do">
+                <li>invite me to share. "you can tell me, i want to know."</li>
+                <li>respond to small needs warmly so i learn it's safe to have them</li>
+                <li>tell me explicitly that i'm not a burden — unprompted</li>
+                <li>notice when i'm clearly holding something back and make space</li>
+              </ul>
+            </div>
+            <div>
+              <span class="how-col-label dont">don't</span>
+              <ul class="how-list dont">
+                <li>respond to small needs with sighs, delays, or reluctance</li>
+                <li>make me feel like i'm interrupting your life by needing something</li>
+                <li>only check in when things are obviously wrong</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper-divider">· · ·</div>
+
+    <!-- 05 -->
+    <div class="paper" style="--accent:#5090a0;--accent-text:#70b0c0;--tilt:-0.3deg;--tape-rot:1deg;" data-delay="4">
+      <div class="paper-inner">
+        <div class="paper-num">05 / 06</div>
+        <div class="paper-title">dysphoria — body, voice, <em>and presence</em></div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#70b0c0;">what it is</div>
+          <p class="paper-text">
+            i'm a transfem girl. that means some days i look in the mirror or hear my voice and it all feels wrong. not sad-wrong. <em>jarring-wrong.</em> like the outside doesn't match the inside, and there's nothing i can do about it in that moment.
+            <br><br>
+            some days it's fine. some days it isn't. it doesn't follow a pattern i can predict. it can be triggered by a photo, a recording, seeing myself in a video call, or just a passing thought. i also carry anxiety about what other people think — whether they see me as who i am, whether they're clocking me, whether i'm "passing" or just existing awkwardly in the wrong skin.
+          </p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#70b0c0;">what helps</div>
+          <div class="how-box">
+            <div>
+              <span class="how-col-label do">do</span>
+              <ul class="how-list do">
+                <li>use she/her consistently, especially around others</li>
+                <li>affirm me — "you look pretty" goes a long way on a hard day</li>
+                <li>if i say i'm dysphoric, just acknowledge it. you don't need to fix it.</li>
+                <li>treat my gender as fact, not something to tiptoe around</li>
+              </ul>
+            </div>
+            <div>
+              <span class="how-col-label dont">don't</span>
+              <ul class="how-list dont">
+                <li>make jokes about my voice or appearance, even small ones</li>
+                <li>bring up pre-transition anything unless i bring it up first</li>
+                <li>say "you don't look dysphoric" — that's not how it works</li>
+                <li>go quiet after i mention it, like it's uncomfortable</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper-divider">· · ·</div>
+
+    <!-- 06 -->
+    <div class="paper" style="--accent:#907040;--accent-text:#c09860;--tilt:0.2deg;--tape-rot:-2.5deg;" data-delay="5">
+      <div class="paper-inner">
+        <div class="paper-num">06 / 06</div>
+        <div class="paper-title">closeness makes me <em>more</em> vulnerable, not less</div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#c09860;">what it is</div>
+          <p class="paper-text">
+            most people assume getting closer to someone means getting more comfortable — more resilient, less reactive. for me it's the opposite. the closer you get, the lower my guard drops. which means the more impact you have.
+            <br><br>
+            a stranger ignoring me barely registers. a close friend doing the same thing can ruin my whole day. this isn't me being dramatic. it's just that the people i care about most are also the people with the most access to actually hurt me — and i let them have that access because i love them.
+            <br><br>
+            i also give a lot quietly. i notice things. i remember things. i do small careful things to make the people i love feel seen. i don't usually announce it. i just do it. and i don't need it returned in the same way — i just need to know it's noticed sometimes.
+          </p>
+        </div>
+
+        <div class="paper-section">
+          <div class="paper-section-label" style="--accent-text:#c09860;">what helps</div>
+          <div class="how-box">
+            <div>
+              <span class="how-col-label do">do</span>
+              <ul class="how-list do">
+                <li>be consistent. consistent more than anything else.</li>
+                <li>acknowledge the small things i do — i notice that you noticed</li>
+                <li>remind me occasionally that you're not going anywhere</li>
+                <li>treat teasing as something that requires care the closer we are</li>
+              </ul>
+            </div>
+            <div>
+              <span class="how-col-label dont">don't</span>
+              <ul class="how-list dont">
+                <li>go from warm to distant without explanation</li>
+                <li>assume i know how you feel — say it</li>
+                <li>mistake my quiet giving for not needing anything in return</li>
+                <li>think the teasing that felt fine a month ago still feels the same now</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .papers -->
+
+  <div class="pg-footer">
+    <p class="pg-footer-text">
+      if you've read this far —<br>
+      thank you. genuinely.<br>
+      <em>not everyone would.</em>
+    </p>
+    <a href="lunark-floral2.html" class="back-link">← back to the surface</a>
+  </div>
+
+</div><!-- end #content -->
+
+<script>
+// ── snow ──
+const canvas = document.getElementById('snowCanvas');
+const ctx = canvas.getContext('2d');
+let flakes = [];
+let W, H;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function makeFlake() {
+  return {
+    x: Math.random() * W,
+    y: Math.random() * H * -0.2,
+    r: 0.5 + Math.random() * 2,
+    speed: 0.3 + Math.random() * 0.8,
+    drift: (Math.random() - 0.5) * 0.3,
+    opacity: 0.15 + Math.random() * 0.35,
+    wobble: Math.random() * Math.PI * 2,
+    wobbleSpeed: 0.005 + Math.random() * 0.01,
+  };
+}
+
+for (let i = 0; i < 120; i++) {
+  const f = makeFlake();
+  f.y = Math.random() * H; // start scattered
+  flakes.push(f);
+}
+
+function snowLoop() {
+  ctx.clearRect(0, 0, W, H);
+  for (const f of flakes) {
+    f.wobble += f.wobbleSpeed;
+    f.x += f.drift + Math.sin(f.wobble) * 0.2;
+    f.y += f.speed;
+    if (f.y > H + 10) { Object.assign(f, makeFlake()); f.y = -10; }
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(220,210,240,${f.opacity})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(snowLoop);
+}
+snowLoop();
+
+// ── disclaimer countdown ──
+const discEl  = document.getElementById('disclaimer');
+const btn     = document.getElementById('discBtn');
+const btnText = document.getElementById('btnText');
+const btnCount = document.getElementById('btnCount');
+let seconds = 3;
+let ready = false;
+
+const interval = setInterval(() => {
+  seconds--;
+  if (seconds <= 0) {
+    clearInterval(interval);
+    ready = true;
+    btn.disabled = false;
+    btn.classList.add('ready');
+    btnText.textContent = 'i understand';
+    btnCount.style.display = 'none';
+    btn.style.setProperty('--progress', '100%');
+  } else {
+    btnCount.textContent = seconds;
+    btn.style.setProperty('--progress', ((3 - seconds) / 3 * 100) + '%');
+  }
+}, 1000);
+
+btn.addEventListener('click', () => {
+  if (!ready) return;
+  discEl.classList.add('hidden');
+  const content = document.getElementById('content');
+  content.classList.add('visible');
+  // trigger paper reveals after a beat
+  setTimeout(revealPapers, 300);
+});
+
+// ── paper slide-in ──
+function revealPapers() {
+  const papers = document.querySelectorAll('.paper');
+  papers.forEach((paper, i) => {
+    const delay = parseInt(paper.dataset.delay || i);
+    setTimeout(() => {
+      paper.classList.add('revealed');
+    }, delay * 220);
+  });
+}
+</script>
+</body>
+</html>
